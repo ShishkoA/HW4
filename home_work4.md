@@ -147,22 +147,154 @@ passwd: all authentication tokens updated successfully.
 [root@localhost cases]# usermod -aG scotlandyard lestrade
 [root@localhost cases]# usermod -aG scotlandyard gregson
 [root@localhost cases]# usermod -aG scotlandyard jones
-```
-Директория и всё её содержимое должно принадлежать группе bakerstreet
-```bash
-chown -R :bakerstreet /share/cases
-chmod  -R ug+rw /share/cases
-```
-других пользователей не должно быть никаких разрешений. 
-```bash
-chmod -R o-rwx /share/cases
-```
-доступы на чтение и запись для группы scotlandyard 
-```bash
-setfacl -R -m d:g:scotlandyard:rw,g:scotlandyard:rw /share/cases
-setfacl -m d:g:scotlandyard:r-x,g:scotlandyard:r-x /share/cases
-```
-исключением Jones только читать документы
-```bash
-setfacl -R -m u:jones:r-x /share/cases
+[root@localhost cases]# chown -R :bakerstreet /share/cases
+[root@localhost cases]# chmod -R o-rwx /share/cases
+[root@localhost cases]# setfacl -R -m d:g:scotlandyard:rwX,g:scotlandyard:rwX /share/cases
+[root@localhost cases]# getfacl /share/cases
+getfacl: Removing leading '/' from absolute path names
+# file: share/cases
+# owner: root
+# group: bakerstreet
+user::rwx
+group::r-x
+group:scotlandyard:rwx
+mask::rwx
+other::---
+default:user::rwx
+default:group::r-x
+default:group:scotlandyard:rwx
+default:mask::rwx
+default:other::---
+
+[root@localhost cases]# getfacl /share/cases/*
+getfacl: Removing leading '/' from absolute path names
+# file: share/cases/moriarty.txt
+# owner: root
+# group: bakerstreet
+user::rw-
+group::r--
+group:scotlandyard:rw-
+mask::rw-
+other::---
+
+# file: share/cases/murders.txt
+# owner: root
+# group: bakerstreet
+user::rw-
+group::r--
+group:scotlandyard:rw-
+mask::rw-
+other::---
+
+[root@localhost cases]# setfacl -R -m d:g:bakerstreet:rwX,g:bakerstreet:rwX /share/cases
+[root@localhost cases]# getfacl /share/cases
+getfacl: Removing leading '/' from absolute path names
+# file: share/cases
+# owner: root
+# group: bakerstreet
+user::rwx
+group::r-x
+group:bakerstreet:rwx
+group:scotlandyard:rwx
+mask::rwx
+other::---
+default:user::rwx
+default:group::r-x
+default:group:bakerstreet:rwx
+default:group:scotlandyard:rwx
+default:mask::rwx
+default:other::---
+
+[root@localhost cases]# getfacl /share/cases/*
+getfacl: Removing leading '/' from absolute path names
+# file: share/cases/moriarty.txt
+# owner: root
+# group: bakerstreet
+user::rw-
+group::r--
+group:bakerstreet:rw-
+group:scotlandyard:rw-
+mask::rw-
+other::---
+
+# file: share/cases/murders.txt
+# owner: root
+# group: bakerstreet
+user::rw-
+group::r--
+group:bakerstreet:rw-
+group:scotlandyard:rw-
+mask::rw-
+other::---
+
+[root@localhost cases]# setfacl -R -m u:jones:r-X /share/cases
+[root@localhost cases]# getfacl /share/cases
+getfacl: Removing leading '/' from absolute path names
+# file: share/cases
+# owner: root
+# group: bakerstreet
+user::rwx
+user:jones:r-x
+group::r-x
+group:bakerstreet:rwx
+group:scotlandyard:rwx
+mask::rwx
+other::---
+default:user::rwx
+default:group::r-x
+default:group:bakerstreet:rwx
+default:group:scotlandyard:rwx
+default:mask::rwx
+default:other::---
+
+[root@localhost cases]# getfacl /share/cases/*
+getfacl: Removing leading '/' from absolute path names
+# file: share/cases/moriarty.txt
+# owner: root
+# group: bakerstreet
+user::rw-
+user:jones:r--
+group::r--
+group:bakerstreet:rw-
+group:scotlandyard:rw-
+mask::rw-
+other::---
+
+# file: share/cases/murders.txt
+# owner: root
+# group: bakerstreet
+user::rw-
+user:jones:r--
+group::r--
+group:bakerstreet:rw-
+group:scotlandyard:rw-
+mask::rw-
+other::---
+
+[root@localhost cases]# su - test
+[test@localhost ~]$ cd /share/cases
+-bash: cd: /share/cases: Permission denied
+[test@localhost ~]$ exit
+logout
+[root@localhost cases]# su - jones
+[jones@localhost ~]$ cd /share/cases
+[jones@localhost cases]$ cat murders.txt
+[jones@localhost cases]$ nano murders
+[jones@localhost cases]$ exit
+logout
+[root@localhost cases]# su - holmes
+[holmes@localhost ~]$ cd /share/cases/
+[holmes@localhost cases]$ nano murders.txt
+[holmes@localhost cases]$ cat murders.txt
+sdfsf
+[holmes@localhost cases]$ exit
+logout
+[root@localhost cases]# su - jones
+Last login: Sat Dec 25 23:24:21 MSK 2021 on pts/0
+[jones@localhost ~]$ cd /share/cases/
+[jones@localhost cases]$ cat murders.txt
+sdfsf
+[jones@localhost cases]$ nano murders.txt
+[jones@localhost cases]$ echo "sdfsd" >> murders.txt
+-bash: murders.txt: Permission denied
 ```
